@@ -64,4 +64,4 @@ if [ ! -d "$WHEEL_CACHE" ] || [ "$cloned_any" -eq 1 ]; then
 fi
 
 echo "Installing dependencies..."
-pip install --no-index --find-links "$WHEEL_CACHE" -r "$RESOLVED_REQ"
+pip install --root-user-action=ignore --no-index --find-links "$WHEEL_CACHE" -r "$RESOLVED_REQ"
