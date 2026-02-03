@@ -13,7 +13,9 @@ COPY requirements.txt /requirements.txt
 COPY setup.sh /setup.sh
 COPY entrypoint.sh /entrypoint.sh
 
-RUN chmod +x /setup.sh /entrypoint.sh
+RUN dos2unix /entrypoint.sh
+RUN dos2unix /setup.sh
+RUN chmod +x /entrypoint.sh /setup.sh
 
 EXPOSE 8188
 
