@@ -2,9 +2,8 @@ RESOLVED_REQ="/app/.cache/resolved-requirements.txt"
 WHEEL_CACHE="/app/.cache/wheels"
 mkdir -p "$WHEEL_CACHE"
 
-# Start with the base requirements
 req_files=("/requirements.txt")
-cloned_any=0   # flag to track if at least one repo was cloned
+cloned_any=0
 
 clone_if_not_exist() {
     local owner="$1"
@@ -16,10 +15,9 @@ clone_if_not_exist() {
 
     if [ ! -d "$target_path" ]; then
         git clone "$repo_url" "$target_path"
-        cloned_any=1       # set flag if a repo was cloned
+        cloned_any=1
     fi
 
-    # Check if requirements.txt exists and add to list
     local req_file="${target_path}/requirements.txt"
     if [ -f "$req_file" ]; then
         req_list+=("$req_file")
@@ -45,7 +43,7 @@ for entry in "${custom_nodes[@]}"; do
 done
 
 resolved_deps=0
-# Resolve packages if resolved-requirements.txt is missing or at least one repo was cloned
+# Resolve packages if RESOLVED_REQ is missing or at least one repo was cloned
 if [ ! -f "$RESOLVED_REQ" ] || [ "$cloned_any" -eq 1 ]; then
     echo "Resolving dependencies..."
     pip-compile "${req_files[@]}" \
@@ -57,8 +55,8 @@ if [ ! -f "$RESOLVED_REQ" ] || [ "$cloned_any" -eq 1 ]; then
     resolved_deps=1
 fi
 
-# Download packages if wheels folder is missing or at least one repo was cloned
-if [ ! -d "$WHEEL_CACHE" ] || [ "$cloned_any" -eq 1 ] || [ "$resolved_deps" -eq 1 ]; then
+# Download packages if wheels folder is missing or dependencies were just resolved
+if [ ! -d "$WHEEL_CACHE" ] || [ "$resolved_deps" -eq 1 ]; then
     echo "Downloading wheels..."
     pip wheel -r "$RESOLVED_REQ" -w "$WHEEL_CACHE" \
         --index-url https://download.pytorch.org/whl/cu130 \
