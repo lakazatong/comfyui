@@ -12,6 +12,7 @@ Ensure you have your GPU's latest driver installed, see https://www.nvidia.com/e
 ## Getting started
 
 `.\init.ps1`
+
 `docker compose up`
 
 ## Usage
