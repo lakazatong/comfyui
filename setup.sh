@@ -35,6 +35,7 @@ custom_nodes=(
     "kijai ComfyUI-KJNodes"
     "giriss comfy-image-saver"
     "jags111 efficiency-nodes-comfyui"
+    "BAIKEMARK ComfyUI-Civitai-Toolkit"
 )
 
 for entry in "${custom_nodes[@]}"; do

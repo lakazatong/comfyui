@@ -1,11 +1,34 @@
-# Backup ./app/custom_nodes
-$customNodesBackup = "./custom_nodes-backup"
-if (Test-Path "./app/custom_nodes") {
-    Write-Host "Backing up subfolders of ./app/custom_nodes to $customNodesBackup..."
-    if (Test-Path $customNodesBackup) { Remove-Item $customNodesBackup -Recurse -Force }
-    New-Item -ItemType Directory -Path $customNodesBackup | Out-Null
-    Get-ChildItem "./app/custom_nodes" -Directory | ForEach-Object {
-        Move-Item $_.FullName "$customNodesBackup/$_"
+# Define backup items
+# Format: @{ Path = "./app/something"; Type = "file"|"folder"|"files"|"folders" }
+# file: single file
+# folder: the whole folder
+# files: all files in the folder
+# folders: all folders in the folder
+$backupList = @(
+    @{ Path = "./app/models"; Type = "folder" } # backup models
+    @{ Path = "./app/input"; Type = "folder" } # backup input
+    @{ Path = "./app/output"; Type = "folder" } # backup output
+    @{ Path = "./app/user/default/workflows"; Type = "folder" } # backup workflows
+    # @{ Path = "./app/custom_nodes"; Type = "folders" } # backup custom nodes
+)
+
+# Backup
+foreach ($item in $backupList) {
+    $source = $item.Path
+    $mode = $item.Type
+    $backup = "./$(Split-Path $source -Leaf)-backup"
+
+    if (Test-Path $source) {
+        Write-Host "Backing up $source to $backup..."
+        if (Test-Path $backup) { Remove-Item $backup -Recurse -Force }
+        if ($mode -in @("files","folders")) { New-Item -ItemType Directory -Path $backup | Out-Null }
+
+        switch ($mode) {
+            "file" { Copy-Item $source $backup }
+            "folder" { Move-Item $source $backup }
+            "files" { Get-ChildItem $source -File | ForEach-Object { Move-Item $_.FullName $backup } }
+            "folders" { Get-ChildItem $source -Directory | ForEach-Object { Move-Item $_.FullName $backup } }
+        }
     }
 }
 
@@ -39,13 +62,26 @@ Get-ChildItem -Path "./ComfyUI-0.11.1" | Move-Item -Destination "./app" -Force
 # Remove the now-empty ComfyUI-0.11.1 folder
 Remove-Item "./ComfyUI-0.11.1" -Force
 
-# Restore custom_nodes
-if (Test-Path $customNodesBackup) {
-    Write-Host "Restoring custom_nodes..."
-    Get-ChildItem $customNodesBackup -Directory | ForEach-Object {
-        Move-Item $_.FullName "./app/custom_nodes/"
+# Restore backups
+foreach ($item in $backupList) {
+    $source = $item.Path
+    $mode = $item.Type
+    $backup = "./$(Split-Path $source -Leaf)-backup"
+
+    if (Test-Path $backup) {
+        Write-Host "Restoring $backup to $source..."
+        switch ($mode) {
+            "file" { Move-Item $backup $source -Force }
+            "folder" { Move-Item $backup $source -Force }
+            "files" {
+                Get-ChildItem $backup -File | ForEach-Object { Move-Item $_.FullName $source }
+            }
+            "folders" {
+                Get-ChildItem $backup -Directory | ForEach-Object { Move-Item $_.FullName $source }
+            }
+        }
+        if ($mode -in @("files","folders")) { Remove-Item $backup -Recurse -Force }
     }
-    Remove-Item $customNodesBackup -Recurse -Force
 }
 
 # Overwrite requirements

@@ -24,4 +24,5 @@ RUN chmod +x /entrypoint.sh /setup.sh
 
 EXPOSE 8188
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/bash"]
+CMD ["/entrypoint.sh"]

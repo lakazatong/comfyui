@@ -1,3 +1,2 @@
-Make sure symlinks (across drives) work
 Test performance for CUDA 13 + sage attention VS CUDA 12 + xFormers
 Improve checkpoints and loras discovery (finding Civitai links from safetensors filenames)
