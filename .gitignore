@@ -2,3 +2,4 @@ ComfyUI-0.11.1.zip
 app/
 .cache/
 node_modules/
+package-lock.json
